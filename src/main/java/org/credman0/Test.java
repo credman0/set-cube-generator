@@ -1,3 +1,5 @@
+package org.credman0;
+
 import java.io.IOException;
 
 public class Test {

@@ -1,5 +1,6 @@
+package org.credman0;
+
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 
 public abstract class CubeGenerator {

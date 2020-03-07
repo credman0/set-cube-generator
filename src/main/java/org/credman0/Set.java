@@ -1,3 +1,5 @@
+package org.credman0;
+
 public class Set {
     protected static final String BASE_URL = "https://shop.tcgplayer.com/price-guide/magic/";
 

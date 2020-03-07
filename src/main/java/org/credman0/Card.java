@@ -1,3 +1,5 @@
+package org.credman0;
+
 public class Card implements Comparable<Object>{
     protected String name;
     protected double cost;
@@ -34,6 +36,6 @@ public class Card implements Comparable<Object>{
         } else if (object instanceof Number) {
             return Double.compare(cost, ((Number) object).doubleValue());
         }
-        throw new IllegalArgumentException("Cannot compare Card to " + object.getClass());
+        throw new IllegalArgumentException("Cannot compare org.credman0.Card to " + object.getClass());
     }
 }
