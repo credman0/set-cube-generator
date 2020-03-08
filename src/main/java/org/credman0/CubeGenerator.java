@@ -73,4 +73,16 @@ public class CubeGenerator {
     public void setNumUncommons(int numUncommons) {
         this.numUncommons = numUncommons;
     }
+
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public double getBudget() {
+        return budget;
+    }
+
+    public Set getSet() {
+        return set;
+    }
 }

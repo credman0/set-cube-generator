@@ -22,6 +22,7 @@ import javafx.stage.Stage;
 import javafx.util.converter.IntegerStringConverter;
 
 import java.io.*;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -113,8 +114,9 @@ public class Main extends Application {
             @Override
             public void handle(ActionEvent actionEvent) {
                 GeneratorList generatorList = null;
+                CubeGenerator generator = null;
                 try {
-                    CubeGenerator generator = new CubeGenerator(Integer.parseInt(quantityField.getText()), Double.parseDouble(budgetField.getText()), (Set) setSelector.getSelectionModel().getSelectedItem());
+                    generator = new CubeGenerator(Integer.parseInt(quantityField.getText()), Double.parseDouble(budgetField.getText()), (Set) setSelector.getSelectionModel().getSelectedItem());
                     generatorList = generator.generate(exclusions);
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -124,7 +126,8 @@ public class Main extends Application {
                 } else {
                     List<Card> cardList = generatorList.getList();
                     FileChooser fileChooser = new FileChooser();
-                    fileChooser.setTitle("Save Image");
+                    fileChooser.setTitle("Save Generated Cards");
+                    fileChooser.setInitialFileName(generator.getSet().getValue() + "("+ NumberFormat.getCurrencyInstance().format(generatorList.budgetUsed)+").txt");
                     File file = fileChooser.showSaveDialog(primaryStage);
                     if (file != null) {
                         saveOutputFile(file,cardList);
