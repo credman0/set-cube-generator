@@ -52,4 +52,12 @@ public class Card implements Comparable<Object>{
         }
         throw new IllegalArgumentException("Cannot compare org.credman0.Card to " + object.getClass());
     }
+
+    public boolean equals(Object o) {
+        if (!(o instanceof Card)) {
+            return false;
+        }
+        Card other = (Card) o;
+        return other.getName().equals(getName());
+    }
 }

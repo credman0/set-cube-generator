@@ -26,9 +26,9 @@ public class GeneratorList {
         return (budget- getBudgetUsed()) / (quantityTotal - listInternal.size());
     }
 
-    public void addQuantity(List<Card> setList, int quantity) {
+    public void addQuantity(List<Card> setList, int quantity, int avoidDuplicates) {
         for (int i = 0; i < quantity; i++) {
-            addFromList(setList);
+            addFromList(setList, avoidDuplicates);
         }
     }
 
@@ -36,7 +36,7 @@ public class GeneratorList {
      *
      * @param setList must be sorted
      */
-    public void addFromList (List<Card> setList) {
+    public void addFromList (List<Card> setList, int avoidDuplicates) {
         double avgRemaining = getAverageRemainingCost();
         int selectionIndexStart = setList.size()/2;
         int jumpSize = selectionIndexStart/2;
@@ -49,7 +49,9 @@ public class GeneratorList {
 //                    jumpSize /= 2;
 //                    selectionCost = setList.get(selectionIndexStart).getCost();
 //                }
-                int selectedIndex = rand.nextInt(setList.size() - selectionIndexStart) + selectionIndexStart;
+                int maxIndex = Collections.binarySearch(setList,  budget-budgetUsed);
+                maxIndex = maxIndex<0? -maxIndex - 1:maxIndex;
+                int selectedIndex = rand.nextInt(maxIndex - selectionIndexStart) + selectionIndexStart;
                 Card selectedCard = setList.get(selectedIndex);
                 // don't blow the whole budget at once
                 while (selectedCard.getCost()>budget/2) {
@@ -66,8 +68,15 @@ public class GeneratorList {
 //                }
                 int selectedIndex = rand.nextInt(selectionIndexStart);
                 Card selectedCard = setList.get(selectedIndex);
-                budgetUsed = getBudgetUsed() + selectedCard.getCost();
-                listInternal.add(selectedCard);
+                if (avoidDuplicates>0) {
+                    if (listInternal.contains(selectedCard)) {
+                        addFromList(setList, avoidDuplicates-1);
+                    } else {
+                        addCard(selectedCard);
+                    }
+                } else {
+                    addCard(selectedCard);
+                }
             }
         } else {
             int allowedCostMultiplier = quantityTotal-listInternal.size() > 2?2:1;

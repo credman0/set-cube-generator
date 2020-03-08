@@ -50,11 +50,11 @@ public class CubeGenerator {
             }
         }
         generatorList.setExpenseWeighting(0.0);
-        generatorList.addQuantity(commonsList, numCommons);
+        generatorList.addQuantity(commonsList, numCommons, 0);
         generatorList.setExpenseWeighting(0.1);
-        generatorList.addQuantity(uncommonsList, numUncommons);
+        generatorList.addQuantity(uncommonsList, numUncommons, 0);
         generatorList.setExpenseWeighting(1.0);
-        generatorList.addQuantity(raresList, quantity - (numCommons + numUncommons));
+        generatorList.addQuantity(raresList, quantity - (numCommons + numUncommons), 3);
         return generatorList;
     }
 
