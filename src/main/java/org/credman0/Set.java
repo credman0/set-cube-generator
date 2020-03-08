@@ -1,6 +1,6 @@
 package org.credman0;
 
-public class Set {
+public class Set implements Comparable<Object>{
     protected static final String BASE_URL = "https://shop.tcgplayer.com/price-guide/magic/";
 
     protected String name;
@@ -33,5 +33,10 @@ public class Set {
 
     public String toString() {
         return name;
+    }
+
+    @Override
+    public int compareTo(Object o) {
+        return toString().compareTo(o.toString());
     }
 }

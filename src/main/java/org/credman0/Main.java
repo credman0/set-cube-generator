@@ -3,12 +3,15 @@ package org.credman0;
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableArray;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.TextFieldListCell;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -19,6 +22,8 @@ import javafx.stage.Stage;
 import javafx.util.converter.IntegerStringConverter;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.UnaryOperator;
 
@@ -28,6 +33,8 @@ public class Main extends Application {
     protected ComboBox setSelector;
     protected Label previewArea;
     protected CheckBox popupResultsCheckBox;
+
+    protected List<String> exclusions = new ArrayList<>();
 
     public static void main(String[] args) {
         launch(args);
@@ -39,7 +46,9 @@ public class Main extends Application {
         VBox vbox = new VBox();
         setSelector = new ComboBox();
         try {
-            setSelector.getItems().addAll(Scraper.scrapSets());
+            List<Set> sets = Scraper.scrapSets();
+            Collections.sort(sets);
+            setSelector.getItems().addAll(sets);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -85,6 +94,15 @@ public class Main extends Application {
         quantityBox.setAlignment(Pos.CENTER);
         vbox.getChildren().add(quantityBox);
 
+        Button advancedButton = new Button("Advanced Options");
+        advancedButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                displayAdvancedOptionsPopup(primaryStage);
+            }
+        });
+        vbox.getChildren().add(advancedButton);
+
         previewArea = new Label();
         previewArea.setWrapText(true);
         previewArea.setText(generatePreview());
@@ -96,7 +114,8 @@ public class Main extends Application {
             public void handle(ActionEvent actionEvent) {
                 GeneratorList generatorList = null;
                 try {
-                    generatorList = CubeGenerator.generateFromSet(Integer.parseInt(quantityField.getText()), Double.parseDouble(budgetField.getText()), (Set) setSelector.getSelectionModel().getSelectedItem());
+                    CubeGenerator generator = new CubeGenerator(Integer.parseInt(quantityField.getText()), Double.parseDouble(budgetField.getText()), (Set) setSelector.getSelectionModel().getSelectedItem());
+                    generatorList = generator.generate(exclusions);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -177,6 +196,73 @@ public class Main extends Application {
         Scene dialogScene = new Scene(dialogVbox, 600, 500);
         dialog.setScene(dialogScene);
         dialog.show();
+    }
+
+    protected void displayAdvancedOptionsPopup (Stage primaryStage) {
+        final Stage dialog = new Stage();
+        dialog.initModality(Modality.APPLICATION_MODAL);
+        dialog.initOwner(primaryStage);
+        BorderPane dialogPane = new BorderPane();
+        dialogPane.setPadding(new Insets(10,10,10,10));
+
+        ListView<String> listView = new ListView<>(FXCollections.observableArrayList(exclusions));
+        listView.prefWidthProperty().bind(dialogPane.widthProperty());
+        listView.setEditable(true);
+        listView.setOnEditCommit(new EventHandler<ListView.EditEvent<String>>() {
+            @Override
+            public void handle(ListView.EditEvent<String> t) {
+                listView.getItems().set(t.getIndex(), t.getNewValue());
+            }
+        });
+        listView.setCellFactory(TextFieldListCell.forListView());
+        HBox listViewBox = new HBox();
+        listViewBox.getChildren().add(listView);
+        Button listViewAddExclusionButton = new Button("+");
+        listViewAddExclusionButton.setPrefWidth(50);
+        listViewAddExclusionButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                listView.getItems().add("");
+            }
+        });
+        Button listViewRemoveExclusionButton = new Button("-");
+        listViewRemoveExclusionButton.setPrefWidth(50);
+        listViewRemoveExclusionButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                if (listView.getSelectionModel().getSelectedIndex()>=0) {
+                    listView.getItems().remove(listView.getSelectionModel().getSelectedIndex());
+                }
+            }
+        });
+        VBox listViewControlBox = new VBox();
+        listViewControlBox.setFillWidth(false);
+        listViewControlBox.setPrefWidth(50);
+        listViewControlBox.getChildren().add(listViewAddExclusionButton);
+        listViewControlBox.getChildren().add(listViewRemoveExclusionButton);
+        listViewControlBox.setAlignment(Pos.TOP_CENTER);
+        listViewBox.getChildren().add(listViewControlBox);
+        dialogPane.setCenter(listViewBox);
+
+        HBox confirmBox = new HBox();
+        Button confirmButton = new Button("Confirm");
+        confirmButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                exclusions.clear();
+                listView.getItems().removeAll("");
+                exclusions.addAll(listView.getItems());
+                dialog.close();
+            }
+        });
+        confirmBox.getChildren().add(confirmButton);
+        confirmBox.setAlignment(Pos.BOTTOM_RIGHT);
+        dialogPane.setBottom(confirmBox);
+
+        Scene dialogScene = new Scene(dialogPane, 600, 500);
+        dialog.setScene(dialogScene);
+        dialog.show();
+
     }
 
     private class UpdatePreviewListener implements ChangeListener<Object> {

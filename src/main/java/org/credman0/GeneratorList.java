@@ -26,8 +26,8 @@ public class GeneratorList {
         return (budget- getBudgetUsed()) / (quantityTotal - listInternal.size());
     }
 
-    public void addRemaining(List<Card> setList) {
-        for (int i = listInternal.size(); i < quantityTotal; i++) {
+    public void addQuantity(List<Card> setList, int quantity) {
+        for (int i = 0; i < quantity; i++) {
             addFromList(setList);
         }
     }
@@ -51,6 +51,11 @@ public class GeneratorList {
 //                }
                 int selectedIndex = rand.nextInt(setList.size() - selectionIndexStart) + selectionIndexStart;
                 Card selectedCard = setList.get(selectedIndex);
+                // don't blow the whole budget at once
+                while (selectedCard.getCost()>budget/2) {
+                    selectedIndex = rand.nextInt(setList.size() - selectionIndexStart) + selectionIndexStart;
+                    selectedCard = setList.get(selectedIndex);
+                }
                 addCard(selectedCard);
             } else {
                 // median is too expensive
@@ -61,19 +66,20 @@ public class GeneratorList {
 //                }
                 int selectedIndex = rand.nextInt(selectionIndexStart);
                 Card selectedCard = setList.get(selectedIndex);
-                setBudgetUsed(getBudgetUsed() + selectedCard.getCost());
+                budgetUsed = getBudgetUsed() + selectedCard.getCost();
                 listInternal.add(selectedCard);
             }
         } else {
             int allowedCostMultiplier = quantityTotal-listInternal.size() > 2?2:1;
             int maxIndex = Collections.binarySearch(setList,  getAverageRemainingCost()*allowedCostMultiplier);
-            Card selectedCard = setList.get(rand.nextInt(Math.abs(maxIndex)));
+            maxIndex = maxIndex<0? -maxIndex - 1:maxIndex;
+            Card selectedCard = setList.get(rand.nextInt(maxIndex));
             addCard(selectedCard);
         }
     }
 
     protected void addCard(Card card) {
-        setBudgetUsed(getBudgetUsed() + card.getCost());
+        budgetUsed = getBudgetUsed() + card.getCost();
         listInternal.add(card);
     }
 
@@ -81,7 +87,15 @@ public class GeneratorList {
         return budgetUsed;
     }
 
-    public void setBudgetUsed(double budgetUsed) {
-        this.budgetUsed = budgetUsed;
+    public double getExpenseWeighting() {
+        return expenseWeighting;
+    }
+
+    public void setExpenseWeighting(double expenseWeighting) {
+        this.expenseWeighting = expenseWeighting;
+    }
+
+    public String toString() {
+        return getList().toString();
     }
 }

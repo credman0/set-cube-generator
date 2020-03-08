@@ -1,12 +1,18 @@
 package org.credman0;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+
 public class Card implements Comparable<Object>{
     protected String name;
     protected double cost;
+    protected char rarity;
+    protected static final NumberFormat moneyFormat = NumberFormat.getCurrencyInstance();
 
-    public Card(String name, double cost) {
+    public Card(String name, double cost, char rarity) {
         this.name = name;
         this.cost = cost;
+        this.rarity = rarity;
     }
 
     public String getName() {
@@ -25,8 +31,16 @@ public class Card implements Comparable<Object>{
         this.cost = cost;
     }
 
+    public char getRarity() {
+        return rarity;
+    }
+
+    public void setRarity(char rarity) {
+        this.rarity = rarity;
+    }
+
     public String toString() {
-        return name + " = $" + cost;
+        return name + " (" + moneyFormat.format(cost)+")";
     }
 
     @Override

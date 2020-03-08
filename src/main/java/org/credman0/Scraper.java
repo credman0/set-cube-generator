@@ -20,16 +20,17 @@ public abstract class Scraper {
                 continue;
             }
             String name  = row.getElementsByClass("productDetail").get(0).getAllElements().get(0).text();
-            if (name.contains("Token") || name.contains("Emblem") || isBasic(name)) {
+            if (name.contains("Token") || name.contains("Emblem") || name.contains("Checklist Card") || isBasic(name)) {
                 continue;
             }
             String priceString = row.getElementsByClass("marketPrice").get(0).getAllElements().get(0).text().trim();
             // remove dollar sign
             priceString = priceString.substring(1);
             if (priceString.equals("")) {
-                return null;
+                continue;
             }
-            cards.add(new Card(name, Double.parseDouble(priceString)));
+            char rarity = row.getElementsByClass("rarity").get(0).getAllElements().get(0).text().trim().toLowerCase().charAt(0);
+            cards.add(new Card(name, Double.parseDouble(priceString), rarity));
         }
         if (sorted) {
             Collections.sort(cards);
