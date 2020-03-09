@@ -41,6 +41,7 @@ public class Main extends Application {
     protected ComboBox setSelector;
     protected Label previewArea;
     protected CheckBox popupResultsCheckBox;
+    protected CheckBox tcgPurchaseResult;
 
 
     public static void main(String[] args) {
@@ -121,6 +122,7 @@ public class Main extends Application {
 
         Button generateButton = new Button("Generate!");
         popupResultsCheckBox = new CheckBox();
+        tcgPurchaseResult = new CheckBox();
         generateButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
@@ -155,10 +157,23 @@ public class Main extends Application {
             }
         });
 
+
+
         HBox generateButtonBox = new HBox();
+        VBox generateSettings = new VBox();
+        generateSettings.setAlignment(Pos.BOTTOM_RIGHT);
         generateButtonBox.setAlignment(Pos.BOTTOM_RIGHT);
-        generateButtonBox.getChildren().add(new Label("Display popup? "));
-        generateButtonBox.getChildren().add(popupResultsCheckBox);
+        HBox purchaseResultBox = new HBox();
+        purchaseResultBox.setAlignment(Pos.BOTTOM_RIGHT);
+        purchaseResultBox.getChildren().add(new Label("Purchase result? "));
+        purchaseResultBox.getChildren().add(tcgPurchaseResult);
+        generateSettings.getChildren().add(purchaseResultBox);
+        HBox displayPopupBox = new HBox();
+        displayPopupBox.setAlignment(Pos.BOTTOM_RIGHT);
+        displayPopupBox.getChildren().add(new Label("Display popup? "));
+        displayPopupBox.getChildren().add(popupResultsCheckBox);
+        generateSettings.getChildren().add(displayPopupBox);
+        generateButtonBox.getChildren().add(generateSettings);
         generateButtonBox.getChildren().add(generateButton);
 
         vbox.setAlignment(Pos.CENTER);
