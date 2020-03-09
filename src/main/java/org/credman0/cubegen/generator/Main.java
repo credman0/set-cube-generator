@@ -26,12 +26,14 @@ import javafx.stage.Stage;
 import javafx.util.converter.DoubleStringConverter;
 import javafx.util.converter.IntegerStringConverter;
 import org.apache.commons.io.FileUtils;
+import org.credman0.tcgplayer.purchaser.TCGPlayerInteractor;
 
 import java.io.*;
 import java.nio.charset.Charset;
 import java.text.NumberFormat;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.UnaryOperator;
 
 public class Main extends Application {
@@ -141,16 +143,28 @@ public class Main extends Application {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                alert.setTitle("Confirm Price");
+                alert.setHeaderText("Initial price estimate: " + NumberFormat.getCurrencyInstance().format(generatorList.getBudgetUsed()));
+                alert.setContentText("Is this ok?");
+                Optional<ButtonType> result = alert.showAndWait();
+                if (result.get() != ButtonType.OK){
+                    return;
+                }
                 if (popupResultsCheckBox.isSelected()) {
                     displayResultPopup(generatorList, primaryStage);
                 } else {
-                    List<Card> cardList = generatorList.getList();
-                    FileChooser fileChooser = new FileChooser();
-                    fileChooser.setTitle("Save Generated Cards");
-                    fileChooser.setInitialFileName(generator.getSet().getValue() + "("+ NumberFormat.getCurrencyInstance().format(generatorList.budgetUsed)+").txt");
-                    File file = fileChooser.showSaveDialog(primaryStage);
-                    if (file != null) {
-                        saveOutputFile(file,cardList);
+                    if (tcgPurchaseResult.isSelected()) {
+                        TCGPlayerInteractor interactor = new TCGPlayerInteractor(toTCGPlayerList(generatorList.getList()), ((Set) setSelector.getSelectionModel().getSelectedItem()).getName());
+                    } else {
+                        List<Card> cardList = generatorList.getList();
+                        FileChooser fileChooser = new FileChooser();
+                        fileChooser.setTitle("Save Generated Cards");
+                        fileChooser.setInitialFileName(generator.getSet().getValue() + "("+ NumberFormat.getCurrencyInstance().format(generatorList.budgetUsed)+").txt");
+                        File file = fileChooser.showSaveDialog(primaryStage);
+                        if (file != null) {
+                            saveOutputFile(file,cardList);
+                        }
                     }
                 }
 
@@ -189,11 +203,17 @@ public class Main extends Application {
         return quantityField.getText() + " cards from " + ((Set) setSelector.getSelectionModel().getSelectedItem()).name + " totalling $" + budgetField.getText();
     }
 
+    protected String toTCGPlayerList (List<Card> cardList) {
+        StringBuilder outBuilder = new StringBuilder();
+        for (Card card:cardList) {
+            outBuilder.append("1 " + card.getName() + "\n");
+        }
+        return outBuilder.toString();
+    }
+
     protected void saveOutputFile (File file, List<Card> cardList) {
         try (BufferedWriter out = new BufferedWriter(new FileWriter(file))){
-            for (Card card:cardList) {
-                out.write("1 " + card.getName() + "\n");
-            }
+            out.write(toTCGPlayerList(cardList));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
