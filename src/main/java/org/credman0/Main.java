@@ -1,10 +1,10 @@
 package org.credman0;
 
+import com.google.gson.Gson;
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableArray;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -25,28 +25,22 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.converter.DoubleStringConverter;
 import javafx.util.converter.IntegerStringConverter;
+import org.apache.commons.io.FileUtils;
 
 import java.io.*;
+import java.nio.charset.Charset;
 import java.text.NumberFormat;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.UnaryOperator;
 
 public class Main extends Application {
+    protected GeneratorConfiguration generatorConfiguration = new GeneratorConfiguration();
     protected TextField budgetField;
     protected TextField quantityField;
     protected ComboBox setSelector;
     protected Label previewArea;
     protected CheckBox popupResultsCheckBox;
-
-    protected List<String> exclusions = new ArrayList<>();
-    protected int rerollCommons = 0;
-    protected int rerollUncommons = 0;
-    protected int rerollRares = 3;
-    protected int packSize = 15;
-    protected int commonsPer = 11;
-    protected int uncommonsPer = 3;
 
 
     public static void main(String[] args) {
@@ -55,6 +49,11 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) {
+        try {
+            loadConfiguration();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         BorderPane pane = new BorderPane();
         VBox vbox = new VBox();
         setSelector = new ComboBox();
@@ -129,14 +128,14 @@ public class Main extends Application {
                 CubeGenerator generator = null;
                 try {
                     generator = new CubeGenerator(Integer.parseInt(quantityField.getText()), Double.parseDouble(budgetField.getText()), (Set) setSelector.getSelectionModel().getSelectedItem());
-                    generator.setRerollCommons(rerollCommons);
-                    generator.setRerollUncommons(rerollUncommons);
-                    generator.setRerollRares(rerollRares);
-                    generator.setPackSize(packSize);
-                    generator.setCommonsPer(commonsPer);
-                    generator.setUncommonsPer(uncommonsPer);
+                    generator.setRerollCommons(generatorConfiguration.getRerollCommons());
+                    generator.setRerollUncommons(generatorConfiguration.getRerollUncommons());
+                    generator.setRerollRares(generatorConfiguration.getRerollRares());
+                    generator.setPackSize(generatorConfiguration.getPackSize());
+                    generator.setCommonsPer(generatorConfiguration.getCommonsPer());
+                    generator.setUncommonsPer(generatorConfiguration.getUncommonsPer());
 
-                    generatorList = generator.generate(exclusions);
+                    generatorList = generator.generate(generatorConfiguration.getExclusions());
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -229,7 +228,7 @@ public class Main extends Application {
         VBox dialogBox = new VBox();
 
         dialogBox.getChildren().add(new Text("Any card that contains a piece of text in this list will be excluded from generation."));
-        ListView<String> listView = new ListView<>(FXCollections.observableArrayList(exclusions));
+        ListView<String> listView = new ListView<>(FXCollections.observableArrayList(generatorConfiguration.getExclusions()));
         listView.prefWidthProperty().bind(dialogPane.widthProperty());
         listView.setEditable(true);
         listView.setOnEditCommit(new EventHandler<ListView.EditEvent<String>>() {
@@ -292,7 +291,8 @@ public class Main extends Application {
         rerollCommonsField.setTextFormatter(
                 new TextFormatter<Integer>(new IntegerStringConverter(), 0, rerollFilter));
         rerollCommonsField.setPrefWidth(24);
-        rerollCommonsField.setText(rerollCommons + "");
+        rerollCommonsField.setMinWidth(24);
+        rerollCommonsField.setText(generatorConfiguration.getRerollCommons() + "");
         rerollCommonsBox.getChildren().add(rerollCommonsField);
         rerollCommonsBox.getChildren().add(new Text(" times."));
         rerollCommonsBox.setAlignment(Pos.CENTER_LEFT);
@@ -304,7 +304,8 @@ public class Main extends Application {
         rerollUncommonsField.setTextFormatter(
                 new TextFormatter<Integer>(new IntegerStringConverter(), 0, rerollFilter));
         rerollUncommonsField.setPrefWidth(24);
-        rerollUncommonsField.setText(rerollUncommons + "");
+        rerollUncommonsField.setMinWidth(24);
+        rerollUncommonsField.setText(generatorConfiguration.getRerollUncommons() + "");
         rerollUncommonsBox.getChildren().add(rerollUncommonsField);
         rerollUncommonsBox.getChildren().add(new Text(" times."));
         rerollUncommonsBox.setAlignment(Pos.CENTER_LEFT);
@@ -316,7 +317,8 @@ public class Main extends Application {
         rerollRaresField.setTextFormatter(
                 new TextFormatter<Integer>(new IntegerStringConverter(), 0, rerollFilter));
         rerollRaresField.setPrefWidth(24);
-        rerollRaresField.setText(rerollRares + "");
+        rerollRaresField.setMinWidth(24);
+        rerollRaresField.setText(generatorConfiguration.getRerollRares() + "");
         rerollRaresBox.getChildren().add(rerollRaresField);
         rerollRaresBox.getChildren().add(new Text(" times."));
         rerollRaresBox.setAlignment(Pos.CENTER_LEFT);
@@ -324,9 +326,9 @@ public class Main extends Application {
 
         int currentPackSize = 15;
         // one count arrays becuase they must be final to be accessed in listeners
-        final int[] currentCommonCount = {commonsPer};
-        final int[] currentUncommonCount = {uncommonsPer};
-        Text rareCountText = new Text((currentPackSize - commonsPer - uncommonsPer) + "");
+        final int[] currentCommonCount = {generatorConfiguration.getCommonsPer()};
+        final int[] currentUncommonCount = {generatorConfiguration.getUncommonsPer()};
+        Text rareCountText = new Text((currentPackSize - generatorConfiguration.getCommonsPer() - generatorConfiguration.getUncommonsPer()) + "");
 
         UnaryOperator<TextFormatter.Change> commonCountFilter = change -> {
             String newText = change.getControlNewText();
@@ -410,20 +412,25 @@ public class Main extends Application {
         confirmButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-                exclusions.clear();
+                generatorConfiguration.getExclusions().clear();
                 listView.getItems().removeAll("");
-                exclusions.addAll(listView.getItems());
+                generatorConfiguration.getExclusions().addAll(listView.getItems());
                 if (!rerollCommonsField.getText().equals("")){
-                    rerollCommons = Integer.parseInt(rerollCommonsField.getText());
+                    generatorConfiguration.setRerollCommons(Integer.parseInt(rerollCommonsField.getText()));
                 }
                 if (!rerollUncommonsField.getText().equals("")){
-                    rerollUncommons = Integer.parseInt(rerollUncommonsField.getText());
+                    generatorConfiguration.setRerollUncommons(Integer.parseInt(rerollUncommonsField.getText()));
                 }
                 if (!rerollRaresField.getText().equals("")){
-                    rerollRares = Integer.parseInt(rerollRaresField.getText());
+                    generatorConfiguration.setRerollRares(Integer.parseInt(rerollRaresField.getText()));
                 }
-                commonsPer = currentCommonCount[0];
-                uncommonsPer = currentUncommonCount[0];
+                generatorConfiguration.setCommonsPer(currentCommonCount[0]);
+                generatorConfiguration.setUncommonsPer(currentUncommonCount[0]);
+                try {
+                    saveConfiguration();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 dialog.close();
             }
         });
@@ -434,6 +441,23 @@ public class Main extends Application {
         Scene dialogScene = new Scene(dialogPane, 600, 500);
         dialog.setScene(dialogScene);
         dialog.show();
+    }
+
+    protected void saveConfiguration () throws IOException {
+        Gson gson = new Gson();
+        String json = gson.toJson(generatorConfiguration);
+        File file = new File("config.json");
+        FileUtils.writeStringToFile(file, json, Charset.defaultCharset());
+    }
+
+    protected void loadConfiguration () throws IOException {
+        Gson gson = new Gson();
+        File file = new File("config.json");
+        if (!file.exists()) {
+            return;
+        }
+        String json = FileUtils.readFileToString(file, Charset.defaultCharset());
+        generatorConfiguration = gson.fromJson(json, GeneratorConfiguration.class);
     }
 
     private class UpdatePreviewListener implements ChangeListener<Object> {
