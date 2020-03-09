@@ -157,7 +157,7 @@ public class Main extends Application {
 
         HBox generateButtonBox = new HBox();
         generateButtonBox.setAlignment(Pos.BOTTOM_RIGHT);
-        generateButtonBox.getChildren().add(new Label("Display popup?"));
+        generateButtonBox.getChildren().add(new Label("Display popup? "));
         generateButtonBox.getChildren().add(popupResultsCheckBox);
         generateButtonBox.getChildren().add(generateButton);
 
