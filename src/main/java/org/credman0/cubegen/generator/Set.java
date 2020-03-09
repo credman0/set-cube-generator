@@ -1,4 +1,4 @@
-package org.credman0;
+package org.credman0.cubegen.generator;
 
 public class Set implements Comparable<Object>{
     protected static final String BASE_URL = "https://shop.tcgplayer.com/price-guide/magic/";

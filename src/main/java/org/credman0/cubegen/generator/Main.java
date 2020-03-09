@@ -1,4 +1,4 @@
-package org.credman0;
+package org.credman0.cubegen.generator;
 
 import com.google.gson.Gson;
 import javafx.application.Application;

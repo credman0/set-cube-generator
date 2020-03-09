@@ -1,4 +1,4 @@
-package org.credman0;
+package org.credman0.cubegen.generator;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;

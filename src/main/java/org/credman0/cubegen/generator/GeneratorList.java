@@ -1,4 +1,4 @@
-package org.credman0;
+package org.credman0.cubegen.generator;
 
 import java.util.ArrayList;
 import java.util.Collections;

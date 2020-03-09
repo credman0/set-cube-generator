@@ -1,0 +1,3 @@
+[submodule "tcgplayer-purchaser"]
+	path = tcgplayer-purchaser
+	url = git@github.com:credman0/tcgplayer-purchaser.git

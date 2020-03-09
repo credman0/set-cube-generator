@@ -1,6 +1,5 @@
-package org.credman0;
+package org.credman0.cubegen.generator;
 
-import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
 public class Card implements Comparable<Object>{
@@ -50,7 +49,7 @@ public class Card implements Comparable<Object>{
         } else if (object instanceof Number) {
             return Double.compare(cost, ((Number) object).doubleValue());
         }
-        throw new IllegalArgumentException("Cannot compare org.credman0.Card to " + object.getClass());
+        throw new IllegalArgumentException("Cannot compare org.credman0.cubegen.generator.Card to " + object.getClass());
     }
 
     public boolean equals(Object o) {

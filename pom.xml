@@ -8,6 +8,7 @@
     <artifactId>price-set-cube-generator</artifactId>
     <version>1.0-SNAPSHOT</version>
     <build>
+        <sourceDirectory>./src/main/java, tcgplayer-purchaser/src/main/java</sourceDirectory>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -30,7 +31,7 @@
                             <archive>
                                 <manifest>
                                     <mainClass>
-                                        org.credman0.Main
+                                        org.credman0.cubegen.generator.Main
                                     </mainClass>
                                 </manifest>
                             </archive>

@@ -1,4 +1,4 @@
-package org.credman0;
+package org.credman0.cubegen.generator;
 
 import java.io.Serializable;
 import java.util.ArrayList;
