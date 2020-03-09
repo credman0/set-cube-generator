@@ -228,6 +228,7 @@ public class Main extends Application {
         dialogPane.setPadding(new Insets(10,10,10,10));
         VBox dialogBox = new VBox();
 
+        dialogBox.getChildren().add(new Text("Any card that contains a piece of text in this list will be excluded from generation."));
         ListView<String> listView = new ListView<>(FXCollections.observableArrayList(exclusions));
         listView.prefWidthProperty().bind(dialogPane.widthProperty());
         listView.setEditable(true);
@@ -298,7 +299,7 @@ public class Main extends Application {
         leftOptionsBox.getChildren().add(rerollCommonsBox);
 
         HBox rerollUncommonsBox = new HBox();
-        rerollUncommonsBox.getChildren().add(new Text("Reroll duplicate rares "));
+        rerollUncommonsBox.getChildren().add(new Text("Reroll duplicate uncommons "));
         TextField rerollUncommonsField = new TextField();
         rerollUncommonsField.setTextFormatter(
                 new TextFormatter<Integer>(new IntegerStringConverter(), 0, rerollFilter));
