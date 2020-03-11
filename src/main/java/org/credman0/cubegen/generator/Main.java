@@ -10,9 +10,11 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldListCell;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -69,6 +71,19 @@ public class Main extends Application {
         }
         setSelector.getSelectionModel().select(0);
         setSelector.valueProperty().addListener(new UpdatePreviewListener());
+        setSelector.setOnKeyTyped(new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent keyEvent) {
+                String searchString = keyEvent.getCharacter();
+
+                int index = Collections.binarySearch(setSelector.getItems(), searchString);
+                if (index > 0) {
+                    setSelector.getSelectionModel().select(index);
+                } else if (-index < setSelector.getItems().size() && setSelector.getItems().get(-index).toString().toLowerCase().startsWith(searchString.toLowerCase())) {
+                    setSelector.getSelectionModel().select(-index);
+                }
+            }
+        });
         vbox.getChildren().add(setSelector);
 
         UnaryOperator<TextFormatter.Change> integerFilter = change -> {

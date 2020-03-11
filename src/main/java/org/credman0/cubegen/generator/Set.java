@@ -37,6 +37,6 @@ public class Set implements Comparable<Object>{
 
     @Override
     public int compareTo(Object o) {
-        return toString().compareTo(o.toString());
+        return toString().toLowerCase().compareTo(o.toString().toLowerCase());
     }
 }
